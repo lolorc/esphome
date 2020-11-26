@@ -43,6 +43,7 @@ class TeleInfo : public PollingComponent, public uart::UARTDevice {
     START_FRAME_RECEIVED,
     END_FRAME_RECEIVED,
   } state_{OFF};
+  uint32_t crc_errors;
   bool read_chars_until_(bool drop, uint8_t c);
   bool check_crc_(const char *grp, const char *grp_end);
   void publish_value_(std::string tag, std::string val);

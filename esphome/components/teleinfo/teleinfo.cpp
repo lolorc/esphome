@@ -64,7 +64,10 @@ bool TeleInfo::read_chars_until_(bool drop, uint8_t c) {
 
   return false;
 }
-void TeleInfo::setup() { state_ = OFF; }
+void TeleInfo::setup() {
+  state_ = OFF;
+  crc_errors = 0;
+}
 void TeleInfo::update() {
   if (state_ == OFF) {
     buf_index_ = 0;
@@ -119,8 +122,13 @@ void TeleInfo::loop() {
           break;
         }
 
-        if (!check_crc_(buf_finger, grp_end))
+        if (!check_crc_(buf_finger, grp_end)) {
+          crc_errors++;
+          for (auto element : teleinfo_sensors_)
+            if (strcmp(element->tag, "ERRORS") == 0)
+              element->sensor->publish_state(crc_errors);
           break;
+        }
 
         /* Get tag */
         field_len = get_field(tag_, buf_finger, grp_end, separator_);
